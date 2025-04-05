@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { sign } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { jwtSecretKey } from "../../environment.js";
 import { prismaClient } from "../../extras/prisma.js";
 import { type SignUpWithUsernameAndPasswordResult, SignUpWithUsernameAndPasswordError, type LogInWithUsernameAndPasswordResult, LogInWtihUsernameAndPasswordError } from "./authentication-types.js";
@@ -85,9 +85,10 @@ const createJWToken = (parameters: { id: string; username: string }): string => 
     username: parameters.username,
   };
 
-  return sign(jwtPayload, jwtSecretKey, {
+  return jwt.sign(jwtPayload, jwtSecretKey, {
     expiresIn: "30d",
   });
+  
 };
 
 const checkIfUserExistsAlready = async (parameters: { username: string }): Promise<boolean> => {
