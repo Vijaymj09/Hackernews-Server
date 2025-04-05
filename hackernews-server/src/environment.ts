@@ -1,3 +1,4 @@
+// Example environment configuration
 export const jwtSecretKey = process.env.JWT_SECRET_KEY || process.exit(1);
 
 export const env = {
