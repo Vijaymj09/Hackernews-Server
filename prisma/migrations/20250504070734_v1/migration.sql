@@ -1,52 +1,50 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "name" TEXT,
+    "username" TEXT NOT NULL,
+    "displayUsername" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "email" TEXT NOT NULL,
+    "emailVerified" BOOLEAN NOT NULL,
+    "image" TEXT,
 
-  - You are about to drop the column `text` on the `Comment` table. All the data in the column will be lost.
-  - You are about to drop the column `updatedAt` on the `Comment` table. All the data in the column will be lost.
-  - You are about to drop the column `url` on the `Post` table. All the data in the column will be lost.
-  - You are about to drop the column `password` on the `User` table. All the data in the column will be lost.
-  - A unique constraint covering the columns `[postId,userId]` on the table `Like` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[email]` on the table `User` will be added. If there are existing duplicate values, this will fail.
-  - Added the required column `content` to the `Comment` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `content` to the `Post` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `displayUsername` to the `User` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `email` to the `User` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `emailVerified` to the `User` table without a default value. This is not possible if the table is not empty.
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
-*/
--- DropForeignKey
-ALTER TABLE "Comment" DROP CONSTRAINT "Comment_postId_fkey";
+-- CreateTable
+CREATE TABLE "Post" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "userId" TEXT NOT NULL,
 
--- DropForeignKey
-ALTER TABLE "Comment" DROP CONSTRAINT "Comment_userId_fkey";
+    CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
+);
 
--- DropForeignKey
-ALTER TABLE "Like" DROP CONSTRAINT "Like_postId_fkey";
+-- CreateTable
+CREATE TABLE "Like" (
+    "id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "postId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
 
--- DropForeignKey
-ALTER TABLE "Like" DROP CONSTRAINT "Like_userId_fkey";
+    CONSTRAINT "Like_pkey" PRIMARY KEY ("id")
+);
 
--- DropForeignKey
-ALTER TABLE "Post" DROP CONSTRAINT "Post_userId_fkey";
+-- CreateTable
+CREATE TABLE "Comment" (
+    "id" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "postId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
 
--- DropIndex
-DROP INDEX "Like_userId_postId_key";
-
--- AlterTable
-ALTER TABLE "Comment" DROP COLUMN "text",
-DROP COLUMN "updatedAt",
-ADD COLUMN     "content" TEXT NOT NULL;
-
--- AlterTable
-ALTER TABLE "Post" DROP COLUMN "url",
-ADD COLUMN     "content" TEXT NOT NULL;
-
--- AlterTable
-ALTER TABLE "User" DROP COLUMN "password",
-ADD COLUMN     "displayUsername" TEXT NOT NULL,
-ADD COLUMN     "email" TEXT NOT NULL,
-ADD COLUMN     "emailVerified" BOOLEAN NOT NULL,
-ADD COLUMN     "image" TEXT;
+    CONSTRAINT "Comment_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Session" (
@@ -94,7 +92,10 @@ CREATE TABLE "Verification" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Session_token_key" ON "Session"("token");
+CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE INDEX "Like_postId_idx" ON "Like"("postId");
@@ -106,7 +107,7 @@ CREATE INDEX "Like_userId_idx" ON "Like"("userId");
 CREATE UNIQUE INDEX "Like_postId_userId_key" ON "Like"("postId", "userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE UNIQUE INDEX "Session_token_key" ON "Session"("token");
 
 -- AddForeignKey
 ALTER TABLE "Post" ADD CONSTRAINT "Post_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
