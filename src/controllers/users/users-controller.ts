@@ -1,27 +1,104 @@
-import { prismaClient } from "../../extras/prisma.js";
-import { GetMeError, type GetAllUsersResult, type GetMeResult } from "./users-types.js";
+import { getPagination } from "../../extras/pagination";
+import { prismaClient } from "../../integrations/prisma";
 
-export const getMe = async (parameters: { userId: string }): Promise<GetMeResult> => {
-  const user = await prismaClient.user.findUnique({
-    where: { id: parameters.userId },
-    select: { id: true, username: true, name: true, createdAt: true, updatedAt: true }
-  });
+import {
+  GetAllUsersError,
+  GetMeError,
 
-  if (!user) throw GetMeError.BAD_REQUEST;
+  type GetAllUsersResult,
+  type GetMeResult,
+} from "./users-types";
 
-  return { user };
+export const GetMe = async (parameters: {
+  userId: string;
+}): Promise<GetMeResult> => {
+  try {
+    const user = await prismaClient.user.findUnique({
+      where: { id: parameters.userId },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        createdAt: true,
+        updatedAt: true,
+        email: true,
+        emailVerified: true,
+        image: true,
+        posts: {
+          select: {
+            id: true,
+            title: true,
+            content: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+        Comment: {
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            postId: true,
+          },
+        },
+        Like: {
+          select: {
+            id: true,
+            createdAt: true,
+            postId: true,
+          },
+        },
+      },
+    });
+
+
+    if (!user) {
+      throw GetMeError.USER_NOT_FOUND;
+    }
+
+    return { user };
+  } catch (e) {
+    console.error(e);
+    throw GetMeError.UNKNOWN;
+  }
 };
 
-export const getAllUsers = async (parameters: {
+export const GetUsers = async (parameter: {
   page: number;
-  pageSize: number;
+  limit: number;
 }): Promise<GetAllUsersResult> => {
-  const users = await prismaClient.user.findMany({
-    orderBy: { name: "asc" },
-    skip: (parameters.page - 1) * parameters.pageSize,
-    take: parameters.pageSize,
-    select: { id: true, username: true, name: true, createdAt: true, updatedAt: true }
-  });
+  try {
+    const { skip, take } = getPagination(parameter.page, parameter.limit);
 
-  return { users };
+    const users = await prismaClient.user.findMany({
+      orderBy: { name: "asc" },
+      skip,
+      take,
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        createdAt: true,
+        updatedAt: true,
+        email: true,
+        emailVerified: true,
+        image: true,
+      },
+    });
+
+    if (!users || users.length === 0) {
+      throw GetAllUsersError.NO_USERS_FOUND;
+    }
+
+    return { users };
+  } catch (e) {
+    console.error(e);
+    throw GetAllUsersError.UNKNOWN;
+  }
 };
+
+
+
+interface GetUserByIdProps {
+  userId: string;
+}

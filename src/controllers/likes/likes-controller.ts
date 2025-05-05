@@ -1,57 +1,122 @@
-import { prismaClient } from "../../extras/prisma.js";
-import { LikeError, type CreateLikeResult, type GetLikesResult } from "./likes-types.js";
+import { getPagination } from "../../extras/pagination";
+import { prismaClient } from "../../integrations/prisma";
+import { LikeStatus, type GetLikesResult, type LikeActionResult } from "./likes-types";
 
-
-export const getLikes = async (parameters: {
+export const getLikesOnPost = async (params: {
   postId: string;
   page: number;
-  pageSize: number;
+  limit: number;
 }): Promise<GetLikesResult> => {
-  const likes = await prismaClient.like.findMany({
-    where: { postId: parameters.postId },
-    orderBy: { createdAt: "desc" },
-    skip: (parameters.page - 1) * parameters.pageSize,
-    take: parameters.pageSize,
-    include: { user: { select: { username: true, name: true } } }
-  });
+  try {
+    const { skip, take } = getPagination(params.page, params.limit);
 
-  return { likes };
+    const post = await prismaClient.post.findUnique({
+      where: { id: params.postId },
+    });
+
+    if (!post) {
+      return { status: LikeStatus.POST_NOT_FOUND };
+    }
+
+    const likes = await prismaClient.like.findMany({
+      where: { postId: params.postId },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (likes.length === 0) {
+      return { status: LikeStatus.NO_LIKES_FOUND };
+    }
+
+   return {
+     status: "SUCCESS",
+     likes: likes.map((like) => ({
+       id: like.id,
+       createdAt: like.createdAt,
+       user: {
+         id: like.user.id,
+         name: like.user.name,
+       },
+     })),
+   };
+  } catch (error) {
+    console.error("Error fetching likes:", error);
+    return { status: LikeStatus.UNKNOWN };
+  }
 };
 
-export const createLike = async (parameters: {
-  userId: string;
+export const deleteLikeOnPost = async (params: {
   postId: string;
-}): Promise<CreateLikeResult> => {
-  const existingLike = await prismaClient.like.findUnique({
-    where: { userId_postId: { userId: parameters.userId, postId: parameters.postId } },
-    include: { user: { select: { username: true, name: true } } }
-  });
+  userId: string;
+}): Promise<LikeActionResult> => {
+  try {
+    const like = await prismaClient.like.findFirst({
+      where: {
+        postId: params.postId,
+        userId: params.userId,
+      },
+    });
 
-  if (existingLike) return { like: existingLike };
+    if (!like) {
+      return { status: LikeStatus.LIKE_NOT_FOUND };
+    }
 
-  const like = await prismaClient.like.create({
-    data: {
-      userId: parameters.userId,
-      postId: parameters.postId
-    },
-    include: { user: { select: { username: true, name: true } } }
-  });
+    await prismaClient.like.delete({
+      where: {
+        id: like.id,
+      },
+    });
 
-  return { like };
+    return { status: LikeStatus.LIKE_DELETED };
+  } catch (error) {
+    console.error(error);
+    return { status: LikeStatus.UNKNOWN };
+  }
 };
 
-export const deleteLike = async (parameters: {
-  userId: string;
+export const createLike = async (params: {
   postId: string;
-}): Promise<void> => {
-  const like = await prismaClient.like.findUnique({
-    where: { userId_postId: { userId: parameters.userId, postId: parameters.postId } }
-  });
+  userId: string;
+}): Promise<LikeActionResult> => {
+  try {
+    const post = await prismaClient.post.findUnique({
+      where: { id: params.postId },
+    });
 
-  if (!like) throw LikeError.NOT_FOUND;
-  if (like.userId !== parameters.userId) throw LikeError.UNAUTHORIZED;
+    if (!post) {
+      return { status: LikeStatus.POST_NOT_FOUND };
+    }
 
-  await prismaClient.like.delete({
-    where: { userId_postId: { userId: parameters.userId, postId: parameters.postId } }
-  });
+    const existingLike = await prismaClient.like.findFirst({
+      where: {
+        postId: params.postId,
+        userId: params.userId,
+      },
+    });
+
+    if (existingLike) {
+      return { status: LikeStatus.ALREADY_LIKED};
+    }
+
+    await prismaClient.like.create({
+      data: {
+        postId: params.postId,
+        userId: params.userId,
+      },
+    });
+
+    return { status: LikeStatus.LIKE_ADDED };
+  } catch (error) {
+    console.error("Error creating like:", error);
+    return { status: LikeStatus.UNKNOWN };
+  }
 };

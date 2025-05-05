@@ -27,16 +27,18 @@ model User {
 }
 
 model Post {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   title     String
   content   String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  url       String?  // ✅ Add this line if needed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   userId    String
-  author    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   Like      Like[]
   Comment   Comment[]
 }
+
 
 model Like {
   id        String   @id @default(uuid())
