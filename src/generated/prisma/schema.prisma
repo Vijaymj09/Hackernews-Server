@@ -12,56 +12,54 @@ datasource db {
 model User {
   id              String    @id @default(uuid())
   name            String?
-  username        String    @unique
-  displayUsername String
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
-  posts           Post[]
-  Like            Like[]
-  Comment         Comment[]
+  username        String    @unique
   email           String    @unique
   emailVerified   Boolean
   image           String?
-  sessions        Session[]
+  displayUsername String
+  about           String?
   accounts        Account[]
+  comments        Comment[]
+  likes           Like[]
+  posts           Post[]
+  sessions        Session[]
 }
 
 model Post {
   id        String    @id @default(uuid())
   title     String
   content   String
+  userId    String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  userId    String
+  comments  Comment[]
+  likes     Like[]
   author    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Like      Like[]
-  Comment   Comment[]
 }
 
 model Like {
   id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Prevents multiple likes by the same user on the same post
-  // Index on postId for quick lookups of likes by post
-  // Index on userId for quick lookups of likes by user
   @@unique([postId, userId])
-  @@index([postId])
-  @@index([userId])
 }
 
 model Comment {
   id        String   @id @default(uuid())
   content   String
-  createdAt DateTime @default(now())
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String?
   userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Session {
@@ -81,7 +79,6 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -91,6 +88,7 @@ model Account {
   password              String?
   createdAt             DateTime
   updatedAt             DateTime
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Verification {
