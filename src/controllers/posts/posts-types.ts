@@ -1,6 +1,7 @@
 import type { Post } from "@prisma/client";
 
 
+
 export type PostCreateResult = {
   post: Post;
 };
@@ -12,31 +13,8 @@ export enum PostStatus {
 }
 
 export type GetPostsResult = {
-  posts: {
-    id: string;
-    title: string;
-    content: string;
-    createdAt: Date;
-    updatedAt: Date;
-    userId: string;
-    author: {
-      id: string;
-      username: string;
-      name: string | null;
-    };
-    Comment: {
-      id: string;
-      content: string;
-      createdAt: Date;
-    }[];
-    Like: {
-      id: string;
-      userId: string;
-      createdAt: Date;
-    }[];
-  }[];
+  posts: Post[];
 };
-
 
 export enum GetPostsError {
   NO_POSTS_FOUND = "NO_POSTS_FOUND",
