@@ -48,12 +48,12 @@ export const GetPosts = async (parameter: {
             name: true,
           },
         },
-        Like: {
+        likes: {
           select: {
             userId: true,
           },
         },
-        Comment: {
+        comments: {
           include: {
             user: {
               select: {
@@ -78,11 +78,11 @@ export const GetPosts = async (parameter: {
         username: post.author.username,
         name: post.author.name,
       },
-      likeCount: post.Like.length,
+      likeCount: post.likes.length,
       likedByUser: userId
-        ? post.Like.some((like) => like.userId === userId)
+        ? post.likes.some((like) => like.userId === userId)
         : false,
-      comments: post.Comment.map((comment) => ({
+      comments: post.comments.map((comment) => ({
         id: comment.id,
         content: comment.content,
         createdAt: comment.createdAt,
@@ -280,10 +280,10 @@ export const GetPostById = async (parameters: {
             name: true,
           },
         },
-        Like: {
+        likes: {
           select: { userId: true },
         },
-        Comment: {
+        comments: {
           include: {
             user: {
               select: {
@@ -309,9 +309,9 @@ export const GetPostById = async (parameters: {
         username: post.author.username,
         name: post.author.name,
       },
-      likeCount: post.Like.length,
-      likedByUser: userId ? post.Like.some((like) => like.userId === userId) : false,
-      comments: post.Comment.map((comment) => ({
+      likeCount: post.likes.length,
+      likedByUser: userId ? post.likes.some((like) => like.userId === userId) : false,
+      comments: post.comments.map((comment) => ({
         id: comment.id,
         content: comment.content,
         createdAt: comment.createdAt,
@@ -493,3 +493,17 @@ export const GetUserPostsBySlug = async (parameters: {
     throw GetUserPostsBySlugError.UNKNOWN;
   }
 };
+
+
+export async function searchPostsByTitle(query: string) {
+  if (!query) return [];
+
+  return prisma.post.findMany({
+    where: {
+      title: {
+        contains: query,
+        mode: "insensitive", // case-insensitive search
+      },
+    },
+  });
+}

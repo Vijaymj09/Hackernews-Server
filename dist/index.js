@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+require("dotenv/config");
+const node_server_1 = require("@hono/node-server");
+const routes_js_1 = require("./routes/routes.js");
+const hono_1 = require("hono");
+const app = new hono_1.Hono();
+app.route("/", routes_js_1.allRoutes);
+(0, node_server_1.serve)(app);
+console.log("server is running at http://localhost:3000");

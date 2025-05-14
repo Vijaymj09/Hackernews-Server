@@ -149,7 +149,7 @@ export const DeleteLike = async (parameters: {
     const post = await prisma.post.findUnique({
       where: { id: postId },
       include: {
-        Like: true,
+        likes: true,
       },
     });
     if (!post) {
