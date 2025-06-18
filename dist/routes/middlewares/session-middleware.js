@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sessionMiddleware = exports.authRoute = void 0;
 const hono_1 = require("hono");
+const better_auth_1 = require("better-auth");
 const factory_1 = require("hono/factory");
 const better_auth_js_1 = require("../../integrations/better-auth.js");
 exports.authRoute = new hono_1.Hono();

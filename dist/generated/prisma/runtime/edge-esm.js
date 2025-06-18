@@ -1,5 +1,4 @@
 "use strict";
-var _Mt_e, _b, __t_e, _d, _Nt_e, _f;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.warnOnce = exports.warnEnvConflicts = exports.skip = exports.objectEnumValues = exports.empty = exports.Sql = exports.Public = exports.PrismaClientValidationError = exports.PrismaClientUnknownRequestError = exports.PrismaClientRustPanicError = exports.PrismaClientKnownRequestError = exports.PrismaClientInitializationError = exports.MetricsClient = exports.Extensions = exports.Decimal = exports.Debug = exports.DMMF = void 0;
 exports.createParam = Hu;
@@ -676,9 +675,7 @@ var Lr, Jo = me(() => {
     p();
     m();
     Lr = class {
-        constructor() {
-            this.events = {};
-        }
+        events = {};
         on(t, r) { return this.events[t] || (this.events[t] = []), this.events[t].push(r), this; }
         emit(t, ...r) { return this.events[t] ? (this.events[t].forEach(n => { n(...r); }), !0) : !1; }
     };
@@ -748,8 +745,8 @@ c();
 p();
 m();
 var Ua = 100, Ni = ["green", "yellow", "blue", "magenta", "cyan", "red"], ur = [], Fi = Date.now(), $a = 0, cn = typeof y < "u" ? y.env : {};
-globalThis.DEBUG ?? (globalThis.DEBUG = cn.DEBUG ?? "");
-globalThis.DEBUG_COLORS ?? (globalThis.DEBUG_COLORS = cn.DEBUG_COLORS ? cn.DEBUG_COLORS === "true" : !0);
+globalThis.DEBUG ??= cn.DEBUG ?? "";
+globalThis.DEBUG_COLORS ??= cn.DEBUG_COLORS ? cn.DEBUG_COLORS === "true" : !0;
 var xt = { enable(e) { typeof e == "string" && (globalThis.DEBUG = e); }, disable() { let e = globalThis.DEBUG; return globalThis.DEBUG = "", e; }, enabled(e) { let t = globalThis.DEBUG.split(",").map(i => i.replace(/[.+?^${}()|[\]\\]/g, "\\$&")), r = t.some(i => i === "" || i[0] === "-" ? !1 : e.match(RegExp(i.split("*").join(".*") + "$"))), n = t.some(i => i === "" || i[0] !== "-" ? !1 : e.match(RegExp(i.slice(1).split("*").join(".*") + "$"))); return r && !n; }, log: (...e) => { let [t, r, ...n] = e; (console.warn ?? console.log)(`${t} ${r}`, ...n); }, formatters: {} };
 function ja(e) { let t = { color: Ni[$a++ % Ni.length], enabled: xt.enabled(e), namespace: e, log: xt.log, extend: () => { } }, r = (...n) => { let { enabled: i, namespace: o, color: s, log: a } = t; if (n.length !== 0 && ur.push([o, ...n]), ur.length > Ua && ur.shift(), xt.enabled(o) || i) {
     let l = n.map(g => typeof g == "string" ? g : Va(g)), d = `+${Date.now() - Fi}ms`;
@@ -845,6 +842,9 @@ m();
 var eo = new Set, mr = (e, t, ...r) => { eo.has(e) || (eo.add(e), fn(t, ...r)); };
 exports.warnOnce = mr;
 var Q = class e extends Error {
+    clientVersion;
+    errorCode;
+    retryable;
     constructor(t, r, n) { super(t), this.name = "PrismaClientInitializationError", this.clientVersion = r, this.errorCode = n, Error.captureStackTrace(e); }
     get [Symbol.toStringTag]() { return "PrismaClientInitializationError"; }
 };
@@ -856,6 +856,10 @@ c();
 p();
 m();
 var oe = class extends Error {
+    code;
+    meta;
+    clientVersion;
+    batchRequestIdx;
     constructor(t, { code: r, clientVersion: n, meta: i, batchRequestIdx: o }) { super(t), this.name = "PrismaClientKnownRequestError", this.code = r, this.clientVersion = n, this.meta = i, Object.defineProperty(this, "batchRequestIdx", { value: o, enumerable: !1, writable: !0 }); }
     get [Symbol.toStringTag]() { return "PrismaClientKnownRequestError"; }
 };
@@ -867,6 +871,7 @@ c();
 p();
 m();
 var Re = class extends Error {
+    clientVersion;
     constructor(t, r) { super(t), this.name = "PrismaClientRustPanicError", this.clientVersion = r; }
     get [Symbol.toStringTag]() { return "PrismaClientRustPanicError"; }
 };
@@ -878,6 +883,8 @@ c();
 p();
 m();
 var se = class extends Error {
+    clientVersion;
+    batchRequestIdx;
     constructor(t, { clientVersion: r, batchRequestIdx: n }) { super(t), this.name = "PrismaClientUnknownRequestError", this.clientVersion = r, Object.defineProperty(this, "batchRequestIdx", { value: n, writable: !0, enumerable: !1 }); }
     get [Symbol.toStringTag]() { return "PrismaClientUnknownRequestError"; }
 };
@@ -889,10 +896,9 @@ c();
 p();
 m();
 var X = class extends Error {
-    constructor(t, { clientVersion: r }) {
-        this.name = "PrismaClientValidationError";
-        super(t), this.clientVersion = r;
-    }
+    name = "PrismaClientValidationError";
+    clientVersion;
+    constructor(t, { clientVersion: r }) { super(t), this.clientVersion = r; }
     get [Symbol.toStringTag]() { return "PrismaClientValidationError"; }
 };
 exports.PrismaClientValidationError = X;
@@ -1535,9 +1541,7 @@ c();
 p();
 m();
 var he = class {
-    constructor() {
-        this._map = new Map;
-    }
+    _map = new Map;
     get(t) { return this._map.get(t)?.value; }
     set(t, r) { this._map.set(t, { value: r }); }
     getOrCreate(t, r) { let n = this._map.get(t); if (n)
@@ -1669,11 +1673,8 @@ c();
 p();
 m();
 var ae = class {
-    constructor(t, r) {
-        this.isRequired = !1;
-        this.name = t;
-        this.value = r;
-    }
+    constructor(t, r) { this.name = t; this.value = r; }
+    isRequired = !1;
     makeRequired() { return this.isRequired = !0, this; }
     write(t) { let { colors: { green: r } } = t.context; t.addMarginSymbol(r(this.isRequired ? "+" : "?")), t.write(r(this.name)), this.isRequired || t.write(r("?")), t.write(r(": ")), typeof this.value == "string" ? t.write(r(this.value)) : t.write(this.value); }
 };
@@ -1694,13 +1695,12 @@ c();
 p();
 m();
 var nt = class {
-    constructor(t = 0, r) {
-        this.lines = [];
-        this.currentLine = "";
-        this.currentIndent = 0;
-        this.context = r;
-        this.currentIndent = t;
-    }
+    constructor(t = 0, r) { this.context = r; this.currentIndent = t; }
+    lines = [];
+    currentLine = "";
+    currentIndent = 0;
+    marginSymbol;
+    afterNextNewLineCallback;
     write(t) { return typeof t == "string" ? this.currentLine += t : t.write(this), this; }
     writeJoined(t, r, n = (i, o) => o.write(i)) { let i = r.length - 1; for (let o = 0; o < r.length; o++)
         n(r[o], this), o !== i && this.write(t); return this; }
@@ -1746,11 +1746,9 @@ c();
 p();
 m();
 var ye = class {
-    constructor(t) {
-        this.isUnderlined = !1;
-        this.color = t => t;
-        this.contents = t;
-    }
+    constructor(t) { this.contents = t; }
+    isUnderlined = !1;
+    color = t => t;
     underline() { return this.isUnderlined = !0, this; }
     setColor(t) { return this.color = t, this; }
     write(t) { let r = t.getCurrentLineLength(); t.write(this.color(this.contents)), this.isUnderlined && t.afterNextNewline(() => { t.write(" ".repeat(r)).writeLine(this.color("~".repeat(this.contents.length))); }); }
@@ -1761,16 +1759,11 @@ c();
 p();
 m();
 var Me = class {
-    constructor() {
-        this.hasError = !1;
-    }
+    hasError = !1;
     markAsError() { return this.hasError = !0, this; }
 };
 var ot = class extends Me {
-    constructor() {
-        super(...arguments);
-        this.items = [];
-    }
+    items = [];
     addItem(t) { return this.items.push(new Cr(t)), this; }
     getField(t) { return this.items[t]; }
     getPrintWidth() { return this.items.length === 0 ? 2 : Math.max(...this.items.map(r => r.value.getPrintWidth())) + 2; }
@@ -1783,11 +1776,8 @@ var ot = class extends Me {
     asObject() { }
 };
 var st = class e extends Me {
-    constructor() {
-        super(...arguments);
-        this.fields = {};
-        this.suggestions = [];
-    }
+    fields = {};
+    suggestions = [];
     addField(t) { this.fields[t.name] = t; }
     addSuggestion(t) { this.suggestions.push(t); }
     getField(t) { return this.fields[t]; }
@@ -1853,9 +1843,7 @@ c();
 p();
 m();
 var St = class {
-    constructor() {
-        this.fields = [];
-    }
+    fields = [];
     addField(t, r) { return this.fields.push({ write(n) { let { green: i, dim: o } = n.context.colors; n.write(i(o(`${t}: ${r}`))).addMarginSymbol(i(o("+"))); } }), this; }
     write(t) { let { colors: { green: r } } = t.context; t.writeLine(r("{")).withIndent(() => { t.writeJoined(it, this.fields).newLine(); }).write(r("}")).addMarginSymbol(r("+")); }
 };
@@ -2029,6 +2017,11 @@ c();
 p();
 m();
 var Ot = class {
+    modelName;
+    name;
+    typeName;
+    isList;
+    isEnum;
     constructor(t, r, n, i, o) { this.modelName = t, this.name = r, this.typeName = n, this.isList = i, this.isEnum = o; }
     _toGraphQLInputType() { let t = this.isList ? "List" : "", r = this.isEnum ? "Enum" : ""; return `${t}${r}${this.typeName}FieldRefInput<${this.modelName}>`; }
 };
@@ -2044,32 +2037,17 @@ var kr = Symbol(), Tn = new WeakMap, Te = class {
     toString() { return Tn.get(this); }
 }, Dt = class extends Te {
     _getNamespace() { return "NullTypes"; }
-}, Mt = (_b = class extends Dt {
-        constructor() {
-            super(...arguments);
-            _Mt_e.set(this, void 0);
-        }
-    },
-    _Mt_e = new WeakMap(),
-    _b);
+}, Mt = class extends Dt {
+    #e;
+};
 An(Mt, "DbNull");
-var _t = (_d = class extends Dt {
-        constructor() {
-            super(...arguments);
-            __t_e.set(this, void 0);
-        }
-    },
-    __t_e = new WeakMap(),
-    _d);
+var _t = class extends Dt {
+    #e;
+};
 An(_t, "JsonNull");
-var Nt = (_f = class extends Dt {
-        constructor() {
-            super(...arguments);
-            _Nt_e.set(this, void 0);
-        }
-    },
-    _Nt_e = new WeakMap(),
-    _f);
+var Nt = class extends Dt {
+    #e;
+};
 An(Nt, "AnyNull");
 var Cn = { classes: { DbNull: Mt, JsonNull: _t, AnyNull: Nt }, instances: { DbNull: new Mt(kr), JsonNull: new _t(kr), AnyNull: new Nt(kr) } };
 exports.objectEnumValues = Cn;
@@ -2080,20 +2058,16 @@ c();
 p();
 m();
 var Do = ": ", Ir = class {
-    constructor(t, r) {
-        this.hasError = !1;
-        this.name = t;
-        this.value = r;
-    }
+    constructor(t, r) { this.name = t; this.value = r; }
+    hasError = !1;
     markAsError() { this.hasError = !0; }
     getPrintWidth() { return this.name.length + this.value.getPrintWidth() + Do.length; }
     write(t) { let r = new ye(this.name); this.hasError && r.underline().setColor(t.context.colors.red), t.write(r).write(Do).write(this.value); }
 };
 var Rn = class {
-    constructor(t) {
-        this.errorMessages = [];
-        this.arguments = t;
-    }
+    arguments;
+    errorMessages = [];
+    constructor(t) { this.arguments = t; }
     write(t) { t.write(this.arguments); }
     addErrorMessage(t) { this.errorMessages.push(t); }
     renderAllMessages(t) {
@@ -2153,15 +2127,12 @@ function Bo(e, t) { if (!t)
         for (let i of n.needs)
             delete r[i]; return r; }
 var Mr = class {
-    constructor(t, r) {
-        this.computedFieldsCache = new he;
-        this.modelExtensionsCache = new he;
-        this.queryCallbacksCache = new he;
-        this.clientExtensions = At(() => this.extension.client ? { ...this.previous?.getAllClientExtensions(), ...this.extension.client } : this.previous?.getAllClientExtensions());
-        this.batchCallbacks = At(() => { let t = this.previous?.getAllBatchQueryCallbacks() ?? [], r = this.extension.query?.$__internalBatch; return r ? t.concat(r) : t; });
-        this.extension = t;
-        this.previous = r;
-    }
+    constructor(t, r) { this.extension = t; this.previous = r; }
+    computedFieldsCache = new he;
+    modelExtensionsCache = new he;
+    queryCallbacksCache = new he;
+    clientExtensions = At(() => this.extension.client ? { ...this.previous?.getAllClientExtensions(), ...this.extension.client } : this.previous?.getAllClientExtensions());
+    batchCallbacks = At(() => { let t = this.previous?.getAllBatchQueryCallbacks() ?? [], r = this.extension.query?.$__internalBatch; return r ? t.concat(r) : t; });
     getAllComputedFields(t) { return this.computedFieldsCache.getOrCreate(t, () => Fo(this.previous?.getAllComputedFields(t), this.extension, t)); }
     getAllClientExtensions() { return this.clientExtensions.get(); }
     getAllModelExtensions(t) { return this.modelExtensionsCache.getOrCreate(t, () => { let r = we(t); return !this.extension.model || !(this.extension.model[r] || this.extension.model.$allModels) ? this.previous?.getAllModelExtensions(t) : { ...this.previous?.getAllModelExtensions(t), ...this.extension.model.$allModels, ...this.extension.model[r] }; }); }
@@ -2295,6 +2266,7 @@ function nc(e) { return typeof e == "object" && e !== null && typeof e.toJSON ==
 function On(e, t) { e === void 0 && t.isPreviewFeatureOn("strictUndefinedChecks") && t.throwValidationError({ kind: "InvalidSelectionValue", selectionPath: t.getSelectionPath(), underlyingError: $o }); }
 var kn = class e {
     constructor(t) { this.params = t; this.params.modelName && (this.modelOrType = this.params.runtimeDataModel.models[this.params.modelName] ?? this.params.runtimeDataModel.types[this.params.modelName]); }
+    modelOrType;
     throwValidationError(t) { Dr({ errors: [t], originalMethod: this.params.originalMethod, args: this.params.rootArgs ?? {}, callsite: this.params.callsite, errorFormat: this.params.errorFormat, clientVersion: this.params.clientVersion, globalOmit: this.params.globalOmit }); }
     getSelectionPath() { return this.params.selectionPath; }
     getArgumentPath() { return this.params.argumentPath; }
@@ -2343,6 +2315,7 @@ m();
 function Go(e) { if (!e._hasPreviewFlag("metrics"))
     throw new X("`metrics` preview feature must be enabled in order to access metrics API", { clientVersion: e._clientVersion }); }
 var Bt = class {
+    _client;
     constructor(t) { this._client = t; }
     prometheus(t) { return Go(this._client), this._client._engine.metrics({ format: "prometheus", ...t }); }
     json(t) { return Go(this._client), this._client._engine.metrics({ format: "json", ...t }); }
@@ -2783,10 +2756,13 @@ c();
 p();
 m();
 var Gr = class extends Error {
+    clientVersion;
+    cause;
     constructor(t, r) { super(t), this.clientVersion = r.clientVersion, this.cause = r.cause; }
     get [Symbol.toStringTag]() { return this.name; }
 };
 var ne = class extends Gr {
+    isRetryable;
     constructor(t, r) { super(t, r), this.isRetryable = r.isRetryable ?? !0; }
 };
 f();
@@ -2801,11 +2777,9 @@ p();
 m();
 function L(e, t) { return { ...e, isRetryable: t }; }
 var ft = class extends ne {
-    constructor(t) {
-        super("This request must be retried", L(t, !0));
-        this.name = "ForcedRetryError";
-        this.code = "P5001";
-    }
+    name = "ForcedRetryError";
+    code = "P5001";
+    constructor(t) { super("This request must be retried", L(t, !0)); }
 };
 N(ft, "ForcedRetryError");
 f();
@@ -2814,11 +2788,9 @@ c();
 p();
 m();
 var Ue = class extends ne {
-    constructor(t, r) {
-        super(t, L(r, !1));
-        this.name = "InvalidDatasourceError";
-        this.code = "P6001";
-    }
+    name = "InvalidDatasourceError";
+    code = "P6001";
+    constructor(t, r) { super(t, L(r, !1)); }
 };
 N(Ue, "InvalidDatasourceError");
 f();
@@ -2827,11 +2799,9 @@ c();
 p();
 m();
 var $e = class extends ne {
-    constructor(t, r) {
-        super(t, L(r, !1));
-        this.name = "NotImplementedYetError";
-        this.code = "P5004";
-    }
+    name = "NotImplementedYetError";
+    code = "P5004";
+    constructor(t, r) { super(t, L(r, !1)); }
 };
 N($e, "NotImplementedYetError");
 f();
@@ -2845,17 +2815,16 @@ c();
 p();
 m();
 var V = class extends ne {
+    response;
     constructor(t, r) { super(t, r), this.response = r.response; let n = this.response.headers.get("prisma-request-id"); if (n) {
         let i = `(The request id was: ${n})`;
         this.message = this.message + " " + i;
     } }
 };
 var je = class extends V {
-    constructor(t) {
-        super("Schema needs to be uploaded", L(t, !0));
-        this.name = "SchemaMissingError";
-        this.code = "P5005";
-    }
+    name = "SchemaMissingError";
+    code = "P5005";
+    constructor(t) { super("Schema needs to be uploaded", L(t, !0)); }
 };
 N(je, "SchemaMissingError");
 f();
@@ -2869,11 +2838,9 @@ c();
 p();
 m();
 var Un = "This request could not be understood by the server", Vt = class extends V {
-    constructor(t, r, n) {
-        this.name = "BadRequestError";
-        this.code = "P5000";
-        super(r || Un, L(t, !1)), n && (this.code = n);
-    }
+    name = "BadRequestError";
+    code = "P5000";
+    constructor(t, r, n) { super(r || Un, L(t, !1)), n && (this.code = n); }
 };
 N(Vt, "BadRequestError");
 f();
@@ -2882,11 +2849,10 @@ c();
 p();
 m();
 var Gt = class extends V {
-    constructor(t, r) {
-        this.name = "HealthcheckTimeoutError";
-        this.code = "P5013";
-        super("Engine not started: healthcheck timeout", L(t, !0)), this.logs = r;
-    }
+    name = "HealthcheckTimeoutError";
+    code = "P5013";
+    logs;
+    constructor(t, r) { super("Engine not started: healthcheck timeout", L(t, !0)), this.logs = r; }
 };
 N(Gt, "HealthcheckTimeoutError");
 f();
@@ -2895,11 +2861,10 @@ c();
 p();
 m();
 var Qt = class extends V {
-    constructor(t, r, n) {
-        this.name = "EngineStartupError";
-        this.code = "P5014";
-        super(r, L(t, !0)), this.logs = n;
-    }
+    name = "EngineStartupError";
+    code = "P5014";
+    logs;
+    constructor(t, r, n) { super(r, L(t, !0)), this.logs = n; }
 };
 N(Qt, "EngineStartupError");
 f();
@@ -2908,11 +2873,9 @@ c();
 p();
 m();
 var Jt = class extends V {
-    constructor(t) {
-        super("Engine version is not supported", L(t, !1));
-        this.name = "EngineVersionNotSupportedError";
-        this.code = "P5012";
-    }
+    name = "EngineVersionNotSupportedError";
+    code = "P5012";
+    constructor(t) { super("Engine version is not supported", L(t, !1)); }
 };
 N(Jt, "EngineVersionNotSupportedError");
 f();
@@ -2921,11 +2884,9 @@ c();
 p();
 m();
 var $n = "Request timed out", Wt = class extends V {
-    constructor(t, r = $n) {
-        super(r, L(t, !1));
-        this.name = "GatewayTimeoutError";
-        this.code = "P5009";
-    }
+    name = "GatewayTimeoutError";
+    code = "P5009";
+    constructor(t, r = $n) { super(r, L(t, !1)); }
 };
 N(Wt, "GatewayTimeoutError");
 f();
@@ -2934,11 +2895,9 @@ c();
 p();
 m();
 var jc = "Interactive transaction error", Ht = class extends V {
-    constructor(t, r = jc) {
-        super(r, L(t, !1));
-        this.name = "InteractiveTransactionError";
-        this.code = "P5015";
-    }
+    name = "InteractiveTransactionError";
+    code = "P5015";
+    constructor(t, r = jc) { super(r, L(t, !1)); }
 };
 N(Ht, "InteractiveTransactionError");
 f();
@@ -2947,11 +2906,9 @@ c();
 p();
 m();
 var Vc = "Request parameters are invalid", Kt = class extends V {
-    constructor(t, r = Vc) {
-        super(r, L(t, !1));
-        this.name = "InvalidRequestError";
-        this.code = "P5011";
-    }
+    name = "InvalidRequestError";
+    code = "P5011";
+    constructor(t, r = Vc) { super(r, L(t, !1)); }
 };
 N(Kt, "InvalidRequestError");
 f();
@@ -2960,11 +2917,9 @@ c();
 p();
 m();
 var jn = "Requested resource does not exist", zt = class extends V {
-    constructor(t, r = jn) {
-        super(r, L(t, !1));
-        this.name = "NotFoundError";
-        this.code = "P5003";
-    }
+    name = "NotFoundError";
+    code = "P5003";
+    constructor(t, r = jn) { super(r, L(t, !1)); }
 };
 N(zt, "NotFoundError");
 f();
@@ -2973,11 +2928,10 @@ c();
 p();
 m();
 var Vn = "Unknown server error", dt = class extends V {
-    constructor(t, r, n) {
-        this.name = "ServerError";
-        this.code = "P5006";
-        super(r || Vn, L(t, !0)), this.logs = n;
-    }
+    name = "ServerError";
+    code = "P5006";
+    logs;
+    constructor(t, r, n) { super(r || Vn, L(t, !0)), this.logs = n; }
 };
 N(dt, "ServerError");
 f();
@@ -2986,11 +2940,9 @@ c();
 p();
 m();
 var Gn = "Unauthorized, check your connection string", Yt = class extends V {
-    constructor(t, r = Gn) {
-        super(r, L(t, !1));
-        this.name = "UnauthorizedError";
-        this.code = "P5007";
-    }
+    name = "UnauthorizedError";
+    code = "P5007";
+    constructor(t, r = Gn) { super(r, L(t, !1)); }
 };
 N(Yt, "UnauthorizedError");
 f();
@@ -2999,11 +2951,9 @@ c();
 p();
 m();
 var Qn = "Usage exceeded, retry again later", Zt = class extends V {
-    constructor(t, r = Qn) {
-        super(r, L(t, !0));
-        this.name = "UsageExceededError";
-        this.code = "P5008";
-    }
+    name = "UsageExceededError";
+    code = "P5008";
+    constructor(t, r = Qn) { super(r, L(t, !0)); }
 };
 N(Zt, "UsageExceededError");
 async function Gc(e) { let t; try {
@@ -3113,11 +3063,11 @@ c();
 p();
 m();
 var er = class extends ne {
+    name = "RequestError";
+    code = "P5010";
     constructor(t, r) {
         super(`Cannot fetch data from service:
 ${t}`, L(r, !0));
-        this.name = "RequestError";
-        this.code = "P5010";
     }
 };
 N(er, "RequestError");
@@ -3152,14 +3102,30 @@ async function Hc(e, t) { let r = Rs["@prisma/engines-version"], n = t.clientVer
 async function ks(e, t) { let r = await Hc(e, t); return Ss("version", r), r; }
 function Kc(e) { return encodeURI(`https://unpkg.com/prisma@${e}/package.json`); }
 var Is = 3, Qr = Y("prisma:client:dataproxyEngine"), Wn = class {
+    apiKey;
+    tracingHelper;
+    logLevel;
+    logQueries;
+    engineHash;
     constructor({ apiKey: t, tracingHelper: r, logLevel: n, logQueries: i, engineHash: o }) { this.apiKey = t, this.tracingHelper = r, this.logLevel = n, this.logQueries = i, this.engineHash = o; }
     build({ traceparent: t, interactiveTransaction: r } = {}) { let n = { Authorization: `Bearer ${this.apiKey}`, "Prisma-Engine-Hash": this.engineHash }; this.tracingHelper.isEnabled() && (n.traceparent = t ?? this.tracingHelper.getTraceParent()), r && (n["X-transaction-id"] = r.id); let i = this.buildCaptureSettings(); return i.length > 0 && (n["X-capture-telemetry"] = i.join(", ")), n; }
     buildCaptureSettings() { let t = []; return this.tracingHelper.isEnabled() && t.push("tracing"), this.logLevel && t.push(this.logLevel), this.logQueries && t.push("query"), t; }
 }, ht = class {
-    constructor(t) {
-        this.name = "DataProxyEngine";
-        As(t), this.config = t, this.env = { ...t.env, ...typeof y < "u" ? y.env : {} }, this.inlineSchema = Cs(t.inlineSchema), this.inlineDatasources = t.inlineDatasources, this.inlineSchemaHash = t.inlineSchemaHash, this.clientVersion = t.clientVersion, this.engineHash = t.engineVersion, this.logEmitter = t.logEmitter, this.tracingHelper = t.tracingHelper;
-    }
+    name = "DataProxyEngine";
+    inlineSchema;
+    inlineSchemaHash;
+    inlineDatasources;
+    config;
+    logEmitter;
+    env;
+    clientVersion;
+    engineHash;
+    tracingHelper;
+    remoteClientVersion;
+    host;
+    headerBuilder;
+    startPromise;
+    constructor(t) { As(t), this.config = t, this.env = { ...t.env, ...typeof y < "u" ? y.env : {} }, this.inlineSchema = Cs(t.inlineSchema), this.inlineDatasources = t.inlineDatasources, this.inlineSchemaHash = t.inlineSchemaHash, this.clientVersion = t.clientVersion, this.engineHash = t.engineVersion, this.logEmitter = t.logEmitter, this.tracingHelper = t.tracingHelper; }
     apiKey() { return this.headerBuilder.apiKey; }
     version() { return this.engineHash; }
     async start() { this.startPromise !== void 0 && await this.startPromise, this.startPromise = (async () => { let [t, r] = this.extractHostAndApiKey(); this.host = t, this.headerBuilder = new Wn({ apiKey: r, tracingHelper: this.tracingHelper, logLevel: this.config.logLevel, logQueries: this.config.logQueries, engineHash: this.engineHash }), this.remoteClientVersion = await ks(t, this.config), Qr("host", this.host); })(), await this.startPromise; }
@@ -3349,7 +3315,7 @@ c();
 p();
 m();
 function zn(e) { return function (r, n) { let i, o = (s = e) => { try {
-    return s === void 0 || s?.kind === "itx" ? i ?? (i = $s(r(s))) : $s(r(s));
+    return s === void 0 || s?.kind === "itx" ? i ??= $s(r(s)) : $s(r(s));
 }
 catch (a) {
     return Promise.reject(a);
@@ -3387,9 +3353,7 @@ c();
 p();
 m();
 var Wr = class {
-    constructor() {
-        this._middlewares = [];
-    }
+    _middlewares = [];
     use(t) { this._middlewares.push(t); }
     get(t) { return this._middlewares[t]; }
     has(t) { return !!this._middlewares[t]; }
@@ -3428,11 +3392,9 @@ c();
 p();
 m();
 var Kr = class {
-    constructor(t) {
-        this.tickActive = !1;
-        this.options = t;
-        this.batches = {};
-    }
+    constructor(t) { this.options = t; this.batches = {}; }
+    batches;
+    tickActive = !1;
     request(t) { let r = this.options.batchBy(t); return r ? (this.batches[r] || (this.batches[r] = [], this.tickActive || (this.tickActive = !0, y.nextTick(() => { this.dispatchBatches(), this.tickActive = !1; }))), new Promise((n, i) => { this.batches[r].push({ request: t, resolve: n, reject: i }); })) : this.options.singleLoader(t); }
     dispatchBatches() { for (let t in this.batches) {
         let r = this.batches[t];
@@ -3481,6 +3443,9 @@ function ei(e) { let t = [], r = tp(e); for (let n = 0; n < e.rows.length; n++) 
 function tp(e) { let t = {}; for (let r = 0; r < e.columns.length; r++)
     t[e.columns[r]] = null; return t; }
 var rp = Y("prisma:client:request_handler"), zr = class {
+    client;
+    dataloader;
+    logEmitter;
     constructor(t, r) { this.logEmitter = r, this.client = t, this.dataloader = new Kr({ batchLoader: ys(async ({ requests: n, customDataProxyFetch: i }) => { let { transaction: o, otelParentCtx: s } = n[0], a = n.map(h => h.protocolQuery), l = this.client._tracingHelper.getTraceParent(s), d = n.some(h => Xn(h.protocolQuery.action)); return (await this.client._engine.requestBatch(a, { traceparent: l, transaction: np(o), containsWrite: d, customDataProxyFetch: i })).map((h, v) => { if (h instanceof Error)
             return h; try {
             return this.mapQueryEngineResult(n[v], h);
@@ -3707,42 +3672,46 @@ typeof globalThis == "object" && (globalThis.NODE_CLIENT = !0);
 var pp = { requestArgsToMiddlewareArgs: e => e, middlewareArgsToRequestArgs: e => e }, mp = Symbol.for("prisma.client.transaction.id"), fp = { id: 0, nextId() { return ++this.id; } };
 function dp(e) {
     class t {
-        constructor(n) {
-            this._originalClient = this;
-            this._middlewares = new Wr;
-            this._createPrismaPromise = zn();
-            this.$metrics = new Bt(this);
-            this.$extends = ls;
-            e = n?.__internal?.configOverride?.(e) ?? e, Ps(e), n && ra(n, e);
-            let i = new Lr().on("error", () => { });
-            this._extensions = ut.empty(), this._previewFeatures = Jr(e), this._clientVersion = e.clientVersion ?? zs, this._activeProvider = e.activeProvider, this._globalOmit = n?.omit, this._tracingHelper = js();
-            let o = e.relativeEnvPaths && { rootEnvPath: e.relativeEnvPaths.rootEnvPath && cr.resolve(e.dirname, e.relativeEnvPaths.rootEnvPath), schemaEnvPath: e.relativeEnvPaths.schemaEnvPath && cr.resolve(e.dirname, e.relativeEnvPaths.schemaEnvPath) }, s;
-            if (n?.adapter) {
-                s = n.adapter;
-                let l = e.activeProvider === "postgresql" ? "postgres" : e.activeProvider;
-                if (s.provider !== l)
-                    throw new Q(`The Driver Adapter \`${s.adapterName}\`, based on \`${s.provider}\`, is not compatible with the provider \`${l}\` specified in the Prisma schema.`, this._clientVersion);
-                if (n.datasources || n.datasourceUrl !== void 0)
-                    throw new Q("Custom datasource configuration is not compatible with Prisma Driver Adapters. Please define the database connection string directly in the Driver Adapter configuration.", this._clientVersion);
-            }
-            let a = e.injectableEdgeEnv?.();
-            try {
-                let l = n ?? {}, d = l.__internal ?? {}, g = d.debug === !0;
-                g && Y.enable("prisma:client");
-                let h = cr.resolve(e.dirname, e.relativePath);
-                qi.existsSync(h) || (h = e.dirname), Ne("dirname", e.dirname), Ne("relativePath", e.relativePath), Ne("cwd", h);
-                let v = d.engine || {};
-                if (l.errorFormat ? this._errorFormat = l.errorFormat : y.env.NODE_ENV === "production" ? this._errorFormat = "minimal" : y.env.NO_COLOR ? this._errorFormat = "colorless" : this._errorFormat = "colorless", this._runtimeDataModel = e.runtimeDataModel, this._engineConfig = { cwd: h, dirname: e.dirname, enableDebugLogs: g, allowTriggerPanic: v.allowTriggerPanic, prismaPath: v.binaryPath ?? void 0, engineEndpoint: v.endpoint, generator: e.generator, showColors: this._errorFormat === "pretty", logLevel: l.log && Gs(l.log), logQueries: l.log && !!(typeof l.log == "string" ? l.log === "query" : l.log.find(S => typeof S == "string" ? S === "query" : S.level === "query")), env: a?.parsed ?? {}, flags: [], engineWasm: e.engineWasm, compilerWasm: e.compilerWasm, clientVersion: e.clientVersion, engineVersion: e.engineVersion, previewFeatures: this._previewFeatures, activeProvider: e.activeProvider, inlineSchema: e.inlineSchema, overrideDatasources: vs(l, e.datasourceNames), inlineDatasources: e.inlineDatasources, inlineSchemaHash: e.inlineSchemaHash, tracingHelper: this._tracingHelper, transactionOptions: { maxWait: l.transactionOptions?.maxWait ?? 2e3, timeout: l.transactionOptions?.timeout ?? 5e3, isolationLevel: l.transactionOptions?.isolationLevel }, logEmitter: i, isBundled: e.isBundled, adapter: s }, this._accelerateEngineConfig = { ...this._engineConfig, accelerateUtils: { resolveDatasourceUrl: mt, getBatchRequestPayload: Ur, prismaGraphQLToJSError: $r, PrismaClientUnknownRequestError: se, PrismaClientInitializationError: Q, PrismaClientKnownRequestError: oe, debug: Y("prisma:client:accelerateEngine"), engineVersion: oa.version, clientVersion: e.clientVersion } }, Ne("clientVersion", e.clientVersion), this._engine = Os(e, this._engineConfig), this._requestHandler = new zr(this, i), l.log)
-                    for (let S of l.log) {
-                        let A = typeof S == "string" ? S : S.emit === "stdout" ? S.level : null;
-                        A && this.$on(A, R => { vt.log(`${vt.tags[A] ?? ""}`, R.message || R.query); });
-                    }
-            }
-            catch (l) {
-                throw l.clientVersion = this._clientVersion, l;
-            }
-            return this._appliedParent = $t(this);
+        _originalClient = this;
+        _runtimeDataModel;
+        _requestHandler;
+        _connectionPromise;
+        _disconnectionPromise;
+        _engineConfig;
+        _accelerateEngineConfig;
+        _clientVersion;
+        _errorFormat;
+        _tracingHelper;
+        _middlewares = new Wr;
+        _previewFeatures;
+        _activeProvider;
+        _globalOmit;
+        _extensions;
+        _engine;
+        _appliedParent;
+        _createPrismaPromise = zn();
+        constructor(n) { e = n?.__internal?.configOverride?.(e) ?? e, Ps(e), n && ra(n, e); let i = new Lr().on("error", () => { }); this._extensions = ut.empty(), this._previewFeatures = Jr(e), this._clientVersion = e.clientVersion ?? zs, this._activeProvider = e.activeProvider, this._globalOmit = n?.omit, this._tracingHelper = js(); let o = e.relativeEnvPaths && { rootEnvPath: e.relativeEnvPaths.rootEnvPath && cr.resolve(e.dirname, e.relativeEnvPaths.rootEnvPath), schemaEnvPath: e.relativeEnvPaths.schemaEnvPath && cr.resolve(e.dirname, e.relativeEnvPaths.schemaEnvPath) }, s; if (n?.adapter) {
+            s = n.adapter;
+            let l = e.activeProvider === "postgresql" ? "postgres" : e.activeProvider;
+            if (s.provider !== l)
+                throw new Q(`The Driver Adapter \`${s.adapterName}\`, based on \`${s.provider}\`, is not compatible with the provider \`${l}\` specified in the Prisma schema.`, this._clientVersion);
+            if (n.datasources || n.datasourceUrl !== void 0)
+                throw new Q("Custom datasource configuration is not compatible with Prisma Driver Adapters. Please define the database connection string directly in the Driver Adapter configuration.", this._clientVersion);
+        } let a = e.injectableEdgeEnv?.(); try {
+            let l = n ?? {}, d = l.__internal ?? {}, g = d.debug === !0;
+            g && Y.enable("prisma:client");
+            let h = cr.resolve(e.dirname, e.relativePath);
+            qi.existsSync(h) || (h = e.dirname), Ne("dirname", e.dirname), Ne("relativePath", e.relativePath), Ne("cwd", h);
+            let v = d.engine || {};
+            if (l.errorFormat ? this._errorFormat = l.errorFormat : y.env.NODE_ENV === "production" ? this._errorFormat = "minimal" : y.env.NO_COLOR ? this._errorFormat = "colorless" : this._errorFormat = "colorless", this._runtimeDataModel = e.runtimeDataModel, this._engineConfig = { cwd: h, dirname: e.dirname, enableDebugLogs: g, allowTriggerPanic: v.allowTriggerPanic, prismaPath: v.binaryPath ?? void 0, engineEndpoint: v.endpoint, generator: e.generator, showColors: this._errorFormat === "pretty", logLevel: l.log && Gs(l.log), logQueries: l.log && !!(typeof l.log == "string" ? l.log === "query" : l.log.find(S => typeof S == "string" ? S === "query" : S.level === "query")), env: a?.parsed ?? {}, flags: [], engineWasm: e.engineWasm, compilerWasm: e.compilerWasm, clientVersion: e.clientVersion, engineVersion: e.engineVersion, previewFeatures: this._previewFeatures, activeProvider: e.activeProvider, inlineSchema: e.inlineSchema, overrideDatasources: vs(l, e.datasourceNames), inlineDatasources: e.inlineDatasources, inlineSchemaHash: e.inlineSchemaHash, tracingHelper: this._tracingHelper, transactionOptions: { maxWait: l.transactionOptions?.maxWait ?? 2e3, timeout: l.transactionOptions?.timeout ?? 5e3, isolationLevel: l.transactionOptions?.isolationLevel }, logEmitter: i, isBundled: e.isBundled, adapter: s }, this._accelerateEngineConfig = { ...this._engineConfig, accelerateUtils: { resolveDatasourceUrl: mt, getBatchRequestPayload: Ur, prismaGraphQLToJSError: $r, PrismaClientUnknownRequestError: se, PrismaClientInitializationError: Q, PrismaClientKnownRequestError: oe, debug: Y("prisma:client:accelerateEngine"), engineVersion: oa.version, clientVersion: e.clientVersion } }, Ne("clientVersion", e.clientVersion), this._engine = Os(e, this._engineConfig), this._requestHandler = new zr(this, i), l.log)
+                for (let S of l.log) {
+                    let A = typeof S == "string" ? S : S.emit === "stdout" ? S.level : null;
+                    A && this.$on(A, R => { vt.log(`${vt.tags[A] ?? ""}`, R.message || R.query); });
+                }
         }
+        catch (l) {
+            throw l.clientVersion = this._clientVersion, l;
+        } return this._appliedParent = $t(this); }
         get [Symbol.toStringTag]() { return "PrismaClient"; }
         $use(n) { this._middlewares.use(n); }
         $on(n, i) { return n === "beforeExit" ? this._engine.onBeforeExit(i) : n && this._engineConfig.logEmitter.on(n, i), this; }
@@ -3799,8 +3768,10 @@ function dp(e) {
                 throw A.clientVersion = this._clientVersion, A;
             }
         }
+        $metrics = new Bt(this);
         _hasPreviewFlag(n) { return !!this._engineConfig.previewFeatures?.includes(n); }
         $applyPendingMigrations() { return this._engine.applyPendingMigrations(); }
+        $extends = ls;
     }
     return t;
 }
